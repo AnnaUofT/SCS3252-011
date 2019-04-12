@@ -1,0 +1,448 @@
+//to create secondary index
+db.UnsafeAreas.createIndex( { "ID": 1 } )
+
+//to find 10 Toronto neighbourhoods with the highest crime rate
+db.CrimeRate.aggregate(
+   [
+     {$match:{}},
+     {$project: {ID:"$AREA_S_CD",Neighbourhood:"$Neighbourhood",HomecideAvg:"$Homicide_AVG",
+     AssaultAvg:"$Assault_AVG",AutoTheftAvg: "$AutoTheft_AVG",RobberyAvg:"$Robbery_AVG",
+     BreakandEnterAvg:"$BreakandEnter_AVG",TheftOverAvg:"$TheftOver_AVG",
+     CrimeRate: {$add: 
+     [ "$AutoTheft_Rate","$Assault_Rate","$BreakandEnter_Rate","$Robbery_Rate",
+     "$TheftOver_Rate","$Homicide_Rate" ]}}},
+     {$sort:{CrimeRate:-1}},
+     {$limit:10},
+     {$out: "UnsafeAreas"}
+   ]
+)
+//to create secondary index
+db.SafeAreas.createIndex({"ID":1})
+//to find 10 Toronto neighbourhoods with the lowest crime rate
+db.CrimeRate.aggregate(
+   [
+     {$match:{}},
+     {$project: {ID:"$AREA_S_CD",Neighbourhood:"$Neighbourhood",HomecideAvg:"$Homicide_AVG",
+     AssaultAvg:"$Assault_AVG",AutoTheftAvg: "$AutoTheft_AVG",RobberyAvg:"$Robbery_AVG",
+     BreakandEnterAvg:"$BreakandEnter_AVG",TheftOverAvg:"$TheftOver_AVG",
+     CrimeRate: {$add: 
+     [ "$AutoTheft_Rate","$Assault_Rate","$BreakandEnter_Rate","$Robbery_Rate",
+     "$TheftOver_Rate","$Homicide_Rate" ]}}},
+     {$sort:{CrimeRate: 1}},
+     {$limit:10},
+     {$out: "SafeAreas"}
+   ]
+)
+//to create secondary index
+db.PopulationByUnsafeArea.createIndex({"ID":1})
+
+//to find population density for the highest crime rate neighbourhoods
+db.Population.aggregate(
+    [{$match:{ID:{$in:[138,76,112,108,78,90,73,75,5,22]}}},
+    {$project: {ID:"$ID",Neighbourhood:"$Neighbourhood",
+    PopulationTotal:"$Population, 2016",Density:"$Population density per square kilometre"}},
+    {$sort:{Density:-1}},
+    {$out:"PopulationByUnsafeArea"}
+    ]
+)
+//to create secondary index
+db.PopulationBySafeArea.createIndex({"ID":1})
+//to find population density for the lowest crime rate neighbourhoods
+db.Population.aggregate(
+    [{$match:{ID:{$in:[ 12, 23, 42, 46, 56, 87, 99, 100, 109, 118 ]}}},
+    {$project: {ID:"$ID",Neighbourhood:"$Neighbourhood",
+    PopulationTotal:"$Population, 2016",Density:"$Population density per square kilometre"}},
+    {$sort:{Density:-1}},
+    {$out:"PopulationBySafeArea"}
+    ]
+)
+//to create secondary index
+db.IncomeByUnsafeArea.createIndex({"ID":1})
+//to find average after tax household income for the highest crime rate neibourhoods 
+db.Income.aggregate(
+    [{$match:{ID:{$in:[138,76,112,108,78,90,73,75,5,22]}}},
+    {$project: {ID:"$ID",Neighbourhood:"$Neighbourhood",AvgIncomePerIndividual:"$Total income: Average amount ()"}},
+    {$sort:{AvgIncomePerIndividual:-1}},
+    {$out:"IncomeByUnsafeArea"}
+    ]
+)
+//to create secondary index
+db.IncomeBySafeArea.createIndex({"ID":1})
+//to find average after tax household income for the lowest crime rate neighbourhoods
+db.Income.aggregate(
+    [{$match:{ID:{$in:[ 12, 23, 42, 46, 56, 87, 99, 100, 109, 118 ]}}},
+    {$project: {ID:"$ID",Neighbourhood:"$Neighbourhood",AvgIncomePerIndividual:"$Total income: Average amount ()"}},
+    {$sort:{AvgIncomePerIndividual:-1}},
+    {$out:"IncomeBySafeArea"}
+    ]
+)
+//to create secondary index
+db.EmploymentByUnsafeArea.createIndex({"ID":1})
+// to determine employment status for the in labour force population - high crime rate areas
+db.Employment.aggregate(
+    [{$match:{ID:{$in:[138,76,112,108,78,90,73,75,5,22]}}},
+    {$project: {ID:"$ID",Neighbourhood:"$Neighbourhood",InLabourForce:"$In the labour force", Employed:"$Employed", 
+    Unemployed:"$Unemployed",UnemploymentRate:"$Unemployment rate"}},
+    {$sort:{UnemploymentRate: -1}},
+    {$out:"EmploymentByUnsafeArea"}
+    ]
+)
+//create secondary index
+db.EmploymentBySafeArea.createIndex({"ID":1})
+
+//to determine employment status for the in labour force population - low crime rate areas
+db.Employment.aggregate(
+    [{$match:{ID:{$in:[ 12, 23, 42, 46, 56, 87, 99, 100, 109, 118 ]}}},
+    {$project: {ID:"$ID",Neighbourhood:"$Neighbourhood",InLabourForce:"$In the labour force", Employed:"$Employed", 
+    Unemployed:"$Unemployed",UnemploymentRate:"$Unemployment rate"}},
+    {$sort:{UnemploymentRate: -1}},
+    {$out:"EmploymentBySafeArea"}
+    ]
+)
+//to create secondary index
+db.PopulationAgeByUnsafeArea.createIndex({"ID":1})
+//to determine population age for high crime rate areas
+db.PopulationAge.aggregate(
+    [{$match:{ID:{$in:[138,76,112,108,78,90,73,75,5,22]}}},
+    {$project: {ID:"$ID",Neighbourhood:"$Neighbourhood",Children:"$Children (0-14 years)",Youth:"$Youth (15-24 years)",
+    WorkingAge:"$Working Age (25-54 years)",Preretirement:"$Pre-retirement (55-64 years)",Seniors:"$Seniors (65+ years)"}},
+    {$sort:{WorkingAge: -1}},
+    {$out:"PopulationAgeByUnsafeArea"}
+    ]
+)
+//to create secondary index
+db.PopulationAgeBySafeArea.createIndex({"ID":1})
+//to determine population age for low crime areas
+db.PopulationAge.aggregate(
+    [{$match:{ID:{$in:[12, 23, 42, 46, 56, 87, 99, 100, 109, 118 ]}}},
+    {$project: {ID:"$ID",Neighbourhood:"$Neighbourhood",Children:"$Children (0-14 years)",Youth:"$Youth (15-24 years)",
+    WorkingAge:"$Working Age (25-54 years)",Preretirement:"$Pre-retirement (55-64 years)",Seniors:"$Seniors (65+ years)"}},
+    {$sort:{WorkingAge: -1}},
+    {$out:"PopulationAgeBySafeArea"}
+    ]
+)
+//to create secondary index
+db.MaritalStatusByUnsafeArea.createIndex({"ID":1})
+
+//to determine marital status for population in high crime rate areas
+db.MaritalStatus.aggregate(
+    [{$match:{ID:{$in:[138,76,112,108,78,90,73,75,5,22]}}},
+    {$project: {ID:"$ID",Neighbourhood:"$Neighbourhood",MarriedOrCommonLaw:"$Married or living common law",
+    Single:"$Not married and not living common law"}},
+    {$sort:{Single: -1}},
+    {$out:"MaritalStatusByUnsafeArea"}
+    ]
+)
+//to create secondary index
+db.MaritalStatusBySafeArea.createIndex({"ID":1})
+//to determine marital status for population in low crime rate areas
+db.MaritalStatus.aggregate(
+    [{$match:{ID:{$in:[12, 23, 42, 46, 56, 87, 99, 100, 109, 118]}}},
+    {$project: {ID:"$ID",Neighbourhood:"$Neighbourhood",MarriedOrCommonLaw:"$Married or living common law",
+    Single:"$Not married and not living common law"}},
+    {$sort:{Single: -1}},
+    {$out:"MaritalStatusBySafeArea"}
+    ]
+)
+//to create secondary index
+db.EducationLvlBySafeArea.createIndex({"ID":1})
+
+//to determine education level for population in low crime rate areas
+db.Education.aggregate(
+    [{$match:{ID:{$in:[12, 23, 42, 46, 56, 87, 99, 100, 109, 118]}}},
+    {$project: {ID:"$ID",Neighbourhood:"$Neighbourhood",NoEducation:"$No certificate, diploma or degree",
+    Masters:"$Master's degree",PhD:"$Earned doctorate",
+    Medicine:"$Degree in medicine, dentistry, veterinary medicine or optometry",
+    GradMedTotal:{$add:["$Master's degree","$Earned doctorate","$Degree in medicine, dentistry, veterinary medicine or optometry"]}}},
+    {$sort:{NoEducation: 1}},
+    {$out:"EducationLvlBySafeArea"}
+    ]
+)
+//to create secondary index
+db.EducationLvlByUnsafeArea.createIndex({"ID":1})
+//to determine education level for population in high crime rate areas
+db.Education.aggregate(
+    [{$match:{ID:{$in:[138,76,112,108,78,90,73,75,5,22]}}},
+    {$project: {ID:"$ID",Neighbourhood:"$Neighbourhood",NoEducation:"$No certificate, diploma or degree",
+    Masters:"$Master's degree",PhD:"$Earned doctorate",
+    Medicine:"$Degree in medicine, dentistry, veterinary medicine or optometry",
+    GradMedTotal:{$add:["$Master's degree","$Earned doctorate","$Degree in medicine, dentistry, veterinary medicine or optometry"]}}},
+    {$sort:{NoEducation: 1}},
+    {$out:"EducationLvlByUnsafeArea"}
+    ]
+)
+//create secondary index
+db.PopulationDataSafeAreas.createIndex({"ID":1})
+//to combine data from two collections - PopulationBySafeArea and PopulationAgeBySafeArea
+db.PopulationBySafeArea.aggregate(
+[
+  {$match:{"ID":{$in:[12, 23, 42, 46, 56, 87, 99, 100, 109, 118]}}},
+  {$lookup:
+    {from:"PopulationAgeBySafeArea",
+    localField:"ID",
+    foreignField:"ID",
+    as:"AgeData"}},
+  {$unwind: "$AgeData"},
+  {$project:{
+      "ID":1,
+      "Neighbourhood":1,
+      "PopulationTotal":1,
+      "Density":1,
+      "Children":"$AgeData.Children",
+      "Youth":"$AgeData.Youth",
+      "WorkingAge":"$AgeData.WorkingAge",
+      "Preretirement":"$AgeData.Preretirement",
+      "Seniors":"$AgeData.Seniors",
+      "AdultPopulationTotal":{$add:["$AgeData.WorkingAge","$AgeData.Preretirement","$AgeData.Seniors"]}}},
+  {$out:"PopulationDataSafeAreas"}
+])
+//to create secondary index
+db.PopulationDataUnsafeAreas.createIndex({"ID":1})
+//to combine data from two collections PopulationUnsafeAreas and PopulationAgeByUnsafeAreas
+db.PopulationByUnsafeArea.aggregate(
+[
+  {$match:{"ID":{$in:[138,76,112,108,78,90,73,75,5,22]}}},
+  {$lookup:
+    {from:"PopulationAgeByUnsafeArea",
+    localField:"ID",
+    foreignField:"ID",
+    as:"AgeData"}},
+  {$unwind: "$AgeData"},
+  {$project:{
+      "ID":1,
+      "Neighbourhood":1,
+      "PopulationTotal":1,
+      "Density":1,
+      "Children":"$AgeData.Children",
+      "Youth":"$AgeData.Youth",
+      "WorkingAge":"$AgeData.WorkingAge",
+      "Preretirement":"$AgeData.Preretirement",
+      "Seniors":"$AgeData.Seniors",
+      "AdultPopulationTotal":{$add:["$AgeData.WorkingAge","$AgeData.Preretirement","$AgeData.Seniors"]}}},
+  {$out:"PopulationDataUnsafeAreas"}
+])
+//to create secondary index
+db.EducationDataSafeAreas.createIndex({"ID":1})
+//to merge population and education data for low crime areas
+db.EducationLvlBySafeArea.aggregate(
+[
+  {$match:{"ID":{$in:[12, 23, 42, 46, 56, 87, 99, 100, 109, 118]}}},
+  {$lookup:
+    {from:"PopulationDataSafeAreas",
+    localField:"ID",
+    foreignField:"ID",
+    as:"PopulationData"}},
+  {$unwind: "$PopulationData"},
+  {$project:{
+      "ID":1,
+      "Neighbourhood":1,
+      "NoEducation":1,
+      "Masters":1,
+      "PhD":1,
+      "Medicine":1,
+      "GradMedTotal": 1,
+      "WorkingAgePopulation":"$PopulationData.WorkingAge",
+      "PreretirementPopulation":"$PopulationData.Preretirement",
+      "SeniorsPopulation":"$PopulationData.Seniors",
+      "AdultPopulationTotal":"$PopulationData.AdultPopulationTotal",
+      "NoEducationPercentage":{$divide:["$NoEducation","$PopulationData.AdultPopulationTotal"]},
+      "GradEducationPercentage":{$divide:["$GradMedTotal","$PopulationData.AdultPopulationTotal"]}}},
+  {$out:"EducationDataSafeAreas"}
+])
+//to create secondary index
+db.EducationDataUnsafeAreas.createIndex({"ID":1})
+
+//to merge population and education data for high crime areas
+db.EducationLvlByUnsafeArea.aggregate(
+[
+  {$match:{ID:{$in:[138,76,112,108,78,90,73,75,5,22]}}},
+  {$lookup:
+    {from:"PopulationDataUnsafeAreas",
+    localField:"ID",
+    foreignField:"ID",
+    as:"PopulationData"}},
+  {$unwind: "$PopulationData"},
+  {$project:{
+      "ID":1,
+      "Neighbourhood":1,
+      "NoEducation":1,
+      "Masters":1,
+      "PhD":1,
+      "Medicine":1,
+      "GradMedTotal": 1,
+      "WorkingAgePopulation":"$PopulationData.WorkingAge",
+      "PreretirementPopulation":"$PopulationData.Preretirement",
+      "SeniorsPopulation":"$PopulationData.Seniors",
+      "AdultPopulationTotal":"$PopulationData.AdultPopulationTotal",
+      "NoEducationPercentage":{$divide:["$NoEducation","$PopulationData.AdultPopulationTotal"]},
+      "GradEducationPercentage":{$divide:["$GradMedTotal","$PopulationData.AdultPopulationTotal"]}}},
+  {$out:"EducationDataUnsafeAreas"}
+])
+
+//to create secondary index
+db.MaritalStatusDataSafeAreas.createIndex({"ID":1})
+
+//to merge population and marital status data for low crime areas
+db.MaritalStatusBySafeArea.aggregate(
+[
+  {$match:{"ID":{$in:[12, 23, 42, 46, 56, 87, 99, 100, 109, 118]}}},
+  {$lookup:
+    {from:"PopulationDataSafeAreas",
+    localField:"ID",
+    foreignField:"ID",
+    as:"PopulationData"}},
+  {$unwind: "$PopulationData"},
+  {$project:{
+      "_id":1,
+      "Neighbourhood":1,
+      "MarriedOrCommonLaw":1,
+      "Single":1,
+      "AdultPopulationTotal":"$PopulationData.AdultPopulationTotal",
+      "MarriedCommonLawPercentage":{$divide:["$MarriedOrCommonLaw","$PopulationData.AdultPopulationTotal"]}
+      }},
+  {$out:"MaritalStatusDataSafeAreas"}
+])
+//to create secondary index
+db.MaritalStatusDataUnsafeAreas.createIndex({"ID":1})
+
+//to merge population and marital status data for high crime areas
+db.MaritalStatusByUnsafeArea.aggregate(
+[
+  {$match:{ID:{$in:[138,76,112,108,78,90,73,75,5,22]}}},
+  {$lookup:
+    {from:"PopulationDataUnsafeAreas",
+    localField:"ID",
+    foreignField:"ID",
+    as:"PopulationData"}},
+  {$unwind: "$PopulationData"},
+  {$project:{
+      "ID":1,
+      "Neighbourhood":1,
+      "MarriedOrCommonLaw":1,
+      "Single":1,
+      "AdultPopulationTotal":"$PopulationData.AdultPopulationTotal",
+      "MarriedCommonLawPercentage":{$divide:["$MarriedOrCommonLaw","$PopulationData.AdultPopulationTotal"]}
+      }},
+  {$out:"MaritalStatusDataUnsafeAreas"}
+])
+
+//to create secondary index
+db.VisibleMinorityUnsafeAreas.createIndex({"ID":1})
+
+//to generate visible minority data for high crime areas
+db.UnsafeAreas.aggregate(
+[
+  {$match:{"ID":{$in:[138,76,112,108,78,90,73,75,5,22]}}},
+  {$lookup:{
+    from:"VisibleMinority",
+    localField:"ID",
+    foreignField:"ID",
+    as:"MinorityData"
+  }},
+  {$unwind:"$MinorityData"},
+  {$project:{
+    "ID":1,
+    "Neighbourhood":1,
+    "CrimeRate":1,
+    "VisibleMinorityPercentage":{$divide:
+    ["$MinorityData.Total visible minority population","$MinorityData.Total - Visible minority for the population in private households - 25% sample data"]},
+    "MinorityGroups":{"South Asian":"$MinorityData.South Asian","Chinese":"$MinorityData.Chinese",    
+    "Black":"$MinorityData.Black","Filipino":"$MinorityData.Filipino",
+    "Latin American":"$MinorityData.Latin American","Arab":"$MinorityData.Arab",
+    "Southeast Asian":"$MinorityData.Southeast Asian","West Asian":"$MinorityData.West Asian",
+    "Korean":"$MinorityData.Korean","Japanese":"$MinorityData.Japanese"}}},
+    {$sort:{CrimeRate:-1}},
+   {$out:"VisibleMinorityUnsafeAreas"}
+])
+//to create secondary index
+db.VisibleMinoritySafeAreas.createIndex({"ID":1})
+
+//to generate visible minority data for low crime areas
+db.SafeAreas.aggregate(
+[
+  {$match:{"ID":{$in:[12, 23, 42, 46, 56, 87, 99, 100, 109, 118]}}},
+  {$lookup:{
+    from:"VisibleMinority",
+    localField:"ID",
+    foreignField:"ID",
+    as:"MinorityData"
+  }},
+  {$unwind:"$MinorityData"},
+  {$project:{
+    "ID":1,
+    "Neighbourhood":1,
+    "CrimeRate":1,
+    "VisibleMinorityPercentage":{$divide:
+    ["$MinorityData.Total visible minority population","$MinorityData.Total - Visible minority for the population in private households - 25% sample data"]},
+    "MinorityGroups":{"South Asian":"$MinorityData.South Asian","Chinese":"$MinorityData.Chinese",    
+    "Black":"$MinorityData.Black","Filipino":"$MinorityData.Filipino",
+    "Latin American":"$MinorityData.Latin American","Arab":"$MinorityData.Arab",
+    "Southeast Asian":"$MinorityData.Southeast Asian","West Asian":"$MinorityData.West Asian",
+    "Korean":"$MinorityData.Korean","Japanese":"$MinorityData.Japanese"}}},
+    {$sort:{CrimeRate:-1}},
+    {$out:"VisibleMinoritySafeAreas"}
+])
+
+//to create secondary index
+db.MinorityGroupsSafeAreas.createIndex({"ID":1})
+
+//to list minority population groups for low crime neighbourhoods
+db.VisibleMinoritySafeAreas.aggregate(
+[
+  {$unwind: "$MinorityGroups"},
+  {$project: {
+    "ID":1,
+    "Neighbourhood":1,
+    "South Asian":"$MinorityGroups.South Asian",
+    "Chinese":"$MinorityGroups.Chinese",
+    "Black":"$MinorityGroups.Black",
+    "Filipino":"$MinorityGroups.Filipino",
+    "Latin American":"$MinorityGroups.Latin American",
+    "Arab":"$MinorityGroups.Arab",
+    "Southeast Asian":"$MinorityGroups.Southeast Asian",
+    "West Asian":"$MinorityGroups.West Asian",
+    "Korean":"$MinorityGroups.Korean",
+    "Japanese":"$MinorityGroups.Japanese"
+  }},
+  {$out:"MinorityGroupsSafeAreas"} 
+])
+//to create secondary index
+db.MinorityGroupsUnsafeAreas.createIndex({"ID":1})
+
+//to list minority population groups for high crime neighbourhoods
+
+db.VisibleMinorityUnsafeAreas.aggregate(
+[
+  {$unwind: "$MinorityGroups"},
+  {$project: {
+    "ID":1,
+    "Neighbourhood":1,
+    "South Asian":"$MinorityGroups.South Asian",
+    "Chinese":"$MinorityGroups.Chinese",
+    "Black":"$MinorityGroups.Black",
+    "Filipino":"$MinorityGroups.Filipino",
+    "Latin American":"$MinorityGroups.Latin American",
+    "Arab":"$MinorityGroups.Arab",
+    "Southeast Asian":"$MinorityGroups.Southeast Asian",
+    "West Asian":"$MinorityGroups.West Asian",
+    "Korean":"$MinorityGroups.Korean",
+    "Japanese":"$MinorityGroups.Japanese"
+  }},
+  {$out:"MinorityGroupsUnsafeAreas"} 
+])
+
+//to determine average real estate price for high crime rate neibourhoods 
+
+db.RealEstateSales.aggregate(
+    [
+      {$match:{ID:{$in:[138,76,112,108,78,90,73,75,5,22]}}},
+      {$group : {_id: "$Neighbourhood", AvgPrice : { $avg : "$Price"}}}
+    ])
+
+//to determine average real estate price for low crime rate neibourhoods 
+
+db.RealEstateSales.aggregate(
+    [
+      {$match:{ID:{$in:[12, 23, 42, 46, 56, 87, 99, 100, 109, 118]}}},
+      {$group : {_id : "$Neighbourhood", AvgPrice : { $avg : "$Price"}}}
+    ])
